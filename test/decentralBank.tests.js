@@ -24,9 +24,7 @@ contract("DecentralBank", ([owner, customer]) => {
 		rwd = await RWD.new();
 		decentralBank = await DecentralBank.new(rwd.address, tether.address);
 
-		// eslint-disable-next-line no-undef
 		await rwd.transfer(decentralBank.address, tokens("1000000"));
-
 		await tether.transfer(customer, tokens("100"), { from: owner });
 	});
 
@@ -57,6 +55,88 @@ contract("DecentralBank", ([owner, customer]) => {
 			let balance = await rwd.balanceOf(decentralBank.address);
 			// eslint-disable-next-line no-undef
 			assert.equal(balance, tokens("1000000"));
+		});
+	});
+
+	describe("Yield Farming", async () => {
+		it("rewards tokens for staking", async () => {
+			let result;
+
+			//Check investor balance
+			result = await tether.balanceOf(customer);
+			// eslint-disable-next-line no-undef
+			assert.equal(
+				result.toString(),
+				tokens("100"),
+				"customer mock wallet balance before staking"
+			);
+
+			//Check staking for customer of 100 tokens
+			await tether.approve(decentralBank.address, tokens("100"), {
+				from: customer,
+			});
+			await decentralBank.depositTokens(tokens("100"), { from: customer });
+
+			//Check updated balance of customer
+			result = await tether.balanceOf(customer);
+			// eslint-disable-next-line no-undef
+			assert.equal(
+				result.toString(),
+				tokens("0"),
+				"customer mock wallet balance after staking"
+			);
+
+			// Check update balance of decentral bank
+			result = await tether.balanceOf(decentralBank.address);
+			// eslint-disable-next-line no-undef
+			assert.equal(
+				result.toString(),
+				tokens("100"),
+				"decentral bank mock balance after staking"
+			);
+
+			// Is staking balance
+			result = await decentralBank.isStaking(customer);
+			// eslint-disable-next-line no-undef
+			assert.equal(
+				result.toString(),
+				"true",
+				"customer is staking status after stake"
+			);
+			//Issue tokens
+			await decentralBank.issueTokens({ from: owner });
+
+			// Ensure only the owner can issue tokens
+			await decentralBank.issueTokens({ from: customer }).should.be.rejected;
+
+			//Unstake Tokens
+			await decentralBank.unstakeTokens({ from: customer });
+
+			result = await tether.balanceOf(customer);
+			// eslint-disable-next-line no-undef
+			assert.equal(
+				result.toString(),
+				tokens("100"),
+				"customer mock wallet balance after unstaking"
+			);
+
+			// Check update balance of decentral bank
+			result = await tether.balanceOf(decentralBank.address);
+			// eslint-disable-next-line no-undef
+			assert.equal(
+				result.toString(),
+				tokens("0"),
+				"decentral bank mock balance after unstaking"
+			);
+
+			// Is staking balance
+			result = await decentralBank.isStaking(customer);
+			// eslint-disable-next-line no-undef
+			assert.equal(
+				result.toString(),
+				"false",
+				"customer is staking status after unstake"
+			);
 		});
 	});
 });
