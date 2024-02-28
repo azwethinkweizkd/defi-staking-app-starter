@@ -117,7 +117,7 @@ contract("DecentralBank", ([owner, customer]) => {
 			assert.equal(
 				result.toString(),
 				tokens("100"),
-				"customer mock wallet balance after unstaking"
+				"customer mock wallet balance after destaking"
 			);
 
 			// Check update balance of decentral bank
@@ -126,7 +126,7 @@ contract("DecentralBank", ([owner, customer]) => {
 			assert.equal(
 				result.toString(),
 				tokens("0"),
-				"decentral bank mock balance after unstaking"
+				"decentral bank mock balance after destaking"
 			);
 
 			// Is staking balance
@@ -135,7 +135,7 @@ contract("DecentralBank", ([owner, customer]) => {
 			assert.equal(
 				result.toString(),
 				"false",
-				"customer is staking status after unstake"
+				"customer is staking status after destake"
 			);
 		});
 	});
