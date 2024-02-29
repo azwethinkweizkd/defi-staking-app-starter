@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import Web3 from "web3";
 import Spinner from "react-bootstrap/Spinner";
-
 import Navbar from "./components/Navbar";
 import Main from "./components/Main";
+import BackgroundParticles from "./components/ParticleSettings";
 
 import Tether from "./truffle_abis/Tether.json";
 import RWD from "./truffle_abis/RWD.json";
@@ -120,25 +120,45 @@ function App() {
 	}, [loadBlockchainData]);
 
 	return (
-		<div className="App">
+		<div className="App" style={{ position: "relative" }}>
+			<div style={{ position: "absolute" }}>
+				<BackgroundParticles />
+			</div>
+
 			<Navbar account={userAccount} />
-			{loading ? (
-				<div className="text-center">
-					<Spinner
-						animation="border"
-						variant="primary"
-						style={{ marginTop: "75px" }}
-					/>
+			<div className="container-fluid mt-5">
+				<div className="row">
+					<main
+						role="main"
+						className="col-lg-12"
+						style={{
+							maxWidth: "600px",
+							minHeight: "100vm",
+							marginLeft: "auto",
+							marginRight: "auto",
+						}}>
+						<div>
+							{loading ? (
+								<div className="text-center">
+									<Spinner
+										animation="border"
+										variant="light"
+										style={{ marginTop: "75px" }}
+									/>
+								</div>
+							) : (
+								<Main
+									tetherBalance={tetherBalance}
+									rwdBalance={rwdBalance}
+									stakingBalance={stakingBalance}
+									stakeTokens={stakeTokens}
+									withdrawTokens={withdrawTokens}
+								/>
+							)}
+						</div>
+					</main>
 				</div>
-			) : (
-				<Main
-					tetherBalance={tetherBalance}
-					rwdBalance={rwdBalance}
-					stakingBalance={stakingBalance}
-					stakeTokens={stakeTokens}
-					withdrawTokens={withdrawTokens}
-				/>
-			)}
+			</div>
 		</div>
 	);
 }
