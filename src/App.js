@@ -21,43 +21,48 @@ function App() {
 
 	const loadBlockchainData = useCallback(async () => {
 		try {
-			const web3 = window.web3;
-			const account = await web3.eth.getAccounts();
-			setUserAccount(account[0]);
-			const networkId = await web3.eth.net.getId();
+			if (window.ethereum) {
+				const web3 = new Web3(window.ethereum);
+				await window.ethereum.request({ method: "eth_requestAccounts" });
+				const accounts = await web3.eth.getAccounts();
+				setUserAccount(accounts[0]);
+				const networkId = await web3.eth.net.getId();
 
-			const tetherData = await Tether.networks[networkId];
+				const tetherData = Tether.networks[networkId];
 
-			if (tetherData && userAccount) {
-				const tether = new web3.eth.Contract(Tether.abi, tetherData.address);
-				setTetherContract(tether);
-				const tetherBalance = await tether.methods
-					.balanceOf(userAccount)
-					.call();
-				setTetherBalance(tetherBalance.toString());
-			}
+				if (tetherData && userAccount) {
+					const tether = new web3.eth.Contract(Tether.abi, tetherData.address);
+					setTetherContract(tether);
+					const tetherBalance = await tether.methods
+						.balanceOf(userAccount)
+						.call();
+					setTetherBalance(tetherBalance.toString());
+				}
 
-			const rwdData = await RWD.networks[networkId];
+				const rwdData = RWD.networks[networkId];
 
-			if (rwdData && userAccount) {
-				const rwd = new web3.eth.Contract(RWD.abi, rwdData.address);
-				setRwdContract(rwd);
-				const rwdBalance = await rwd.methods.balanceOf(userAccount).call();
-				setRwdBalance(rwdBalance.toString());
-			}
+				if (rwdData && userAccount) {
+					const rwd = new web3.eth.Contract(RWD.abi, rwdData.address);
+					setRwdContract(rwd);
+					const rwdBalance = await rwd.methods.balanceOf(userAccount).call();
+					setRwdBalance(rwdBalance.toString());
+				}
 
-			const decentralBankData = await DecentralBank.networks[networkId];
+				const decentralBankData = DecentralBank.networks[networkId];
 
-			if (decentralBankData && userAccount) {
-				const decentralBank = new web3.eth.Contract(
-					DecentralBank.abi,
-					decentralBankData.address
-				);
-				setDecentralBank(decentralBank);
-				const stakingBalance = await decentralBank.methods
-					.stakingBalance(userAccount)
-					.call();
-				setStakingBalance(stakingBalance.toString());
+				if (decentralBankData && userAccount) {
+					const decentralBank = new web3.eth.Contract(
+						DecentralBank.abi,
+						decentralBankData.address
+					);
+					setDecentralBank(decentralBank);
+					const stakingBalance = await decentralBank.methods
+						.stakingBalance(userAccount)
+						.call();
+					setStakingBalance(stakingBalance.toString());
+				}
+			} else {
+				alert("Please install MetaMask to use this application.");
 			}
 
 			setLoading(false);
@@ -65,6 +70,33 @@ function App() {
 			console.error("Error loading blockchain data:", error);
 		}
 	}, [userAccount]);
+
+	const stakeTokens = async (amount) => {
+		try {
+			setLoading(true);
+			await tetherContract.methods
+				.approve(decentralBank._address, amount)
+				.send({ from: userAccount });
+			await decentralBank.methods
+				.depositTokens(amount)
+				.send({ from: userAccount });
+			setLoading(false);
+		} catch (error) {
+			console.error("Error staking tokens:", error);
+			setLoading(false);
+		}
+	};
+
+	const withdrawTokens = async () => {
+		try {
+			setLoading(true);
+			await decentralBank.methods.unstakeTokens().send({ from: userAccount });
+			setLoading(false);
+		} catch (error) {
+			console.error("Error withdrawing tokens:", error);
+			setLoading(false);
+		}
+	};
 
 	useEffect(() => {
 		const init = async () => {
@@ -103,6 +135,8 @@ function App() {
 					tetherBalance={tetherBalance}
 					rwdBalance={rwdBalance}
 					stakingBalance={stakingBalance}
+					stakeTokens={stakeTokens}
+					withdrawTokens={withdrawTokens}
 				/>
 			)}
 		</div>
