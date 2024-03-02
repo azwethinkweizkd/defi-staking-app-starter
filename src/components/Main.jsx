@@ -1,34 +1,48 @@
 import { useState } from "react";
+import { observer } from "mobx-react";
+import accountStore from "../stores/AccountStore";
+import contractStore from "../stores/ContractStore";
+import Web3 from "web3";
 import tether from "../tether.png";
 
-const Main = ({
-	tetherBalance,
-	rwdBalance,
-	stakingBalance,
-	stakeTokens,
-	withdrawTokens,
-}) => {
+const Main = observer(() => {
 	const [inputValue, setInputValue] = useState("");
+	let web3;
+	if (window.ethereum) {
+		web3 = new Web3(window.ethereum);
+	} else {
+		console.error("Web3 or Web3.utils is not available.");
+	}
 
 	const handleInputChange = (event) => {
 		setInputValue(event.target.value);
 	};
 
+	const handleStakeTokens = (amount) => {
+		contractStore.tetherContract.methods
+			.approve(contractStore.decentralBank._address, amount)
+			.send({ from: accountStore.userAccount });
+		contractStore.decentralBank.methods
+			.depositTokens(amount)
+			.send({ from: accountStore.userAccount });
+	};
+
+	const handleWithdrawTokens = () => {
+		contractStore.decentralBank.methods
+			.unstakeTokens()
+			.send({ from: accountStore.userAccount });
+	};
+
 	const handleSubmit = (event) => {
 		event.preventDefault();
 		let amount = inputValue.toString();
-		amount = window.web3.utils.toWei(amount, "ether");
-		stakeTokens(amount);
+		amount = web3.utils.toWei(amount, "ether");
+		handleStakeTokens(amount);
 		setInputValue("");
 	};
 
-	const handleWithdraw = (event) => {
-		event.preventDefault();
-		withdrawTokens();
-	};
-
 	return (
-		<div id="content" className="mt-3">
+		<div id="content" className="mt-3" style={{ opacity: "0.9" }}>
 			<div className="card" style={{ background: "none", border: "none" }}>
 				<table className="table text-muted text-center">
 					<thead>
@@ -44,13 +58,19 @@ const Main = ({
 					<tbody>
 						<tr>
 							<td style={{ background: "none", color: "white" }}>
-								{stakingBalance &&
-									window.web3.utils.fromWei(stakingBalance.toString(), "ether")}
+								{accountStore.stakingBalance &&
+									web3.utils?.fromWei(
+										accountStore.stakingBalance.toString(),
+										"ether"
+									)}{" "}
 								USDT
 							</td>
 							<td style={{ background: "none", color: "white" }}>
-								{rwdBalance &&
-									window.web3.utils.fromWei(rwdBalance.toString(), "ether")}
+								{accountStore.rwdBalance &&
+									web3.utils?.fromWei(
+										accountStore.rwdBalance.toString(),
+										"ether"
+									)}{" "}
 								RWD
 							</td>
 						</tr>
@@ -70,8 +90,11 @@ const Main = ({
 							className="float-right"
 							style={{ marginRight: "8px", float: "right" }}>
 							Balance:{" "}
-							{tetherBalance &&
-								window.web3.utils.fromWei(tetherBalance.toString(), "ether")}
+							{accountStore.tetherBalance &&
+								web3.utils?.fromWei(
+									accountStore.tetherBalance.toString(),
+									"ether"
+								)}
 						</span>
 						<div className="input-group mb-4">
 							<input
@@ -101,7 +124,7 @@ const Main = ({
 					</div>
 				</form>
 				<button
-					onClick={handleWithdraw}
+					onClick={handleWithdrawTokens}
 					className="btn btn-lg btn-block"
 					style={{ background: "#FFD700", color: "black" }}>
 					WITHDRAW
@@ -112,6 +135,6 @@ const Main = ({
 			</div>
 		</div>
 	);
-};
+});
 
 export default Main;
