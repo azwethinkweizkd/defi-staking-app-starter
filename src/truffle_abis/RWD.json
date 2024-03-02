@@ -6741,12 +6741,12 @@
         }
       },
       "links": {},
-      "address": "0xE6c1c922A065b6D9F6e22BD9f2F23c2e93f9cb2A",
-      "transactionHash": "0xce118464b91ed7124412d4d9923d8bbc89b25e79da464e5077ce284ff1216428"
+      "address": "0x9752d142e1228020281d9f39b6E3f02765f20395",
+      "transactionHash": "0x51064165406904114d19e2da9211013c905a816eb9ac3ee1d59f7c3d8146d1ce"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-02-27T19:22:28.067Z",
+  "updatedAt": "2024-03-01T03:47:32.458Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

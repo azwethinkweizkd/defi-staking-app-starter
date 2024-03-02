@@ -11,7 +11,7 @@ const BackgroundParticles = () => {
 					background: {
 						color: "#333334",
 					},
-					fpsLimit: 60,
+					fpsLimit: 120,
 					interactivity: {
 						detectsOn: "canvas",
 						events: {
@@ -53,7 +53,7 @@ const BackgroundParticles = () => {
 							width: 1,
 						},
 						collisions: {
-							enable: true,
+							enable: false,
 						},
 						move: {
 							direction: "none",
@@ -61,9 +61,9 @@ const BackgroundParticles = () => {
 							outModes: {
 								default: "bounce",
 							},
-							random: false,
+							random: true,
 							speed: 1.25,
-							straight: false,
+							straight: true,
 						},
 						number: {
 							density: {
